@@ -1,5 +1,6 @@
-# Question 1: By default are django signals executed synchronously or asynchronously?
-# Answer: By default, Django signals are executed synchronously because they are part of the same execution as the sender, also the signal handler block the flow of the caller until the execution is complete.
+''' Question 1: By default are django signals executed synchronously or asynchronously?
+Answer: By default, Django signals are executed synchronously because they are part of the same execution as the sender, 
+also the signal handler block the flow of the caller until the execution is complete.'''
 
 from django.db import models
 from django.db.models.signals import pre_save
