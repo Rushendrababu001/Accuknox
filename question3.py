@@ -1,6 +1,8 @@
-# Question 3: By default do django signals run in the same database transaction as the caller? 
-# Answer:  Yes, Django signals run in the same database transaction as the caller.
-In the example below, the signal modifies a field (status) just before saving. Since this change is made inside a transaction block (atomic()), and the update is successfully saved to the database, it confirms that the signal executes within the same transaction context as the save operation.
+'''Question 3: By default do django signals run in the same database transaction as the caller? 
+Answer:  Yes, Django signals run in the same database transaction as the caller.
+In the example below, the signal modifies a field (status) just before saving. 
+Since this change is made inside a transaction block (atomic()), and the update is successfully saved to the database, 
+it confirms that the signal executes within the same transaction context as the save operation.'''
 
 from django.db import models
 from django.db.models.signals import post_save
