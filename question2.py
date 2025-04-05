@@ -1,6 +1,7 @@
-# Question 2: Do django signals run in the same thread as the caller?
-# Answer:  Yes, Django signals run in the same thread as the caller by default.
-In the example code, we print the thread ID from both the caller and the signal handler. Since both IDs match, it confirms that the signal executes in the same thread as the one triggering it.
+''' Question 2: Do django signals run in the same thread as the caller?
+Answer:  Yes, Django signals run in the same thread as the caller by default.
+In the example code, we print the thread ID from both the caller and the signal handler. 
+Since both IDs match, it confirms that the signal executes in the same thread as the one triggering it.'''
 
 from django.db import models
 from django.db.models.signals import post_save
