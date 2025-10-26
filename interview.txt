@@ -1,0 +1,234 @@
+/*import React, { useState, useEffect } from "react";
+import "./TimeZone.css";
+
+const TimeZone = () => {
+  const [fromCountry, setFromCountry] = useState("Asia/Kolkata");
+  const [toCountry, setToCountry] = useState("Europe/Berlin");
+  const [inputTime, setInputTime] = useState("");
+  const [convertedTime, setConvertedTime] = useState("");
+  const [fromData, setFromData] = useState([]);
+
+  const handleConvert = async () => {
+    if (!inputTime) {
+      setConvertedTime("Please enter a valid time ⏰");
+      return;
+    }
+
+    try {
+      // Fetch current date/time in "from" zone
+      useEffect(()=>{
+      fetch(`https://worldtimeapi.org/api/timezone/${fromCountry}`)
+      .then((res)=>res.json())
+      .then((data)=> setFromData(data));
+      console.log(fromData);
+      }, [])
+
+      // Construct date object using input time
+      const date = new Date(fromData.datetime);
+      const [hours, minutes] = inputTime.split(":").map(Number);
+      date.setHours(hours);
+      date.setMinutes(minutes);
+
+      // Convert using Intl API
+      const converted = new Intl.DateTimeFormat("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: toCountry,
+      }).format(date);
+
+      setConvertedTime(
+        `🕒 ${fromCountry.split("/")[1]} ${inputTime} = ${toCountry.split("/")[1]} ${converted}`
+      );
+    } catch (error) {
+      console.error(error);
+      setConvertedTime("❌ Error fetching data");
+    }
+  };
+
+  return (
+    <div className="converter-container">
+      <h2>🌍 Live Time Zone Converter</h2>
+
+      <div className="input-section">
+        <label>From Country:</label>
+        <select value={fromCountry} onChange={(e) => setFromCountry(e.target.value)}>
+          <option value="Asia/Kolkata">India</option>
+          <option value="Europe/London">United Kingdom</option>
+          <option value="America/New_York">USA (New York)</option>
+          <option value="Asia/Tokyo">Japan</option>
+        </select>
+
+        <label>To Country:</label>
+        <select value={toCountry} onChange={(e) => setToCountry(e.target.value)}>
+          <option value="Europe/Berlin">Germany</option>
+          <option value="Australia/Sydney">Australia</option>
+          <option value="America/Los_Angeles">USA (Los Angeles)</option>
+          <option value="Europe/Paris">France</option>
+        </select>
+
+        <label>Enter Time:</label>
+        <input
+          type="time"
+          value={inputTime}
+          onChange={(e) => setInputTime(e.target.value)}
+        />
+
+        <button onClick={handleConvert}>Convert</button>
+      </div>
+
+      <div className="output-section">
+        {convertedTime && <p>{convertedTime}</p>}
+      </div>
+    </div>
+  );
+};
+
+export default TimeZone;
+*/
+
+import React, { useState } from "react";
+
+export default function TimeZone() {
+  const [fromZone, setFromZone] = useState("Asia/Kolkata");
+  const [toZone, setToZone] = useState("Europe/Berlin");
+  const [inputTime, setInputTime] = useState("");
+  const [convertedTime, setConvertedTime] = useState("");
+
+  const convertTime = async () => {
+    try {
+      // Fetch both zones
+      const fromRes = await fetch(`https://worldtimeapi.org/api/timezone/${fromZone}`);
+      const toRes = await fetch(`https://worldtimeapi.org/api/timezone/${toZone}`);
+      const fromData = await fromRes.json();
+      const toData = await toRes.json();
+
+      // Extract UTC offsets (e.g. +05:30 -> 5.5 hours)
+      const fromOffset = parseFloat(fromData.utc_offset.slice(0, 3)) + 
+        (parseInt(fromData.utc_offset.slice(4, 6)) / 60) * (fromData.utc_offset.startsWith("-") ? -1 : 1);
+      const toOffset = parseFloat(toData.utc_offset.slice(0, 3)) + 
+        (parseInt(toData.utc_offset.slice(4, 6)) / 60) * (toData.utc_offset.startsWith("-") ? -1 : 1);
+
+      // Convert input time to Date in source timezone
+      const [hours, minutes] = inputTime.split(":").map(Number);
+      const inputDate = new Date();
+      inputDate.setHours(hours);
+      inputDate.setMinutes(minutes);
+
+      // Convert to UTC
+      const utcTime = inputDate.getTime() - fromOffset * 60 * 60 * 1000;
+
+      // Convert to target timezone
+      const targetTime = new Date(utcTime + toOffset * 60 * 60 * 1000);
+
+      setConvertedTime(targetTime.toLocaleTimeString());
+    } catch (error) {
+      console.error("Error:", error);
+      setConvertedTime("Error converting time");
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center p-6 bg-gray-100 min-h-screen">
+      <h2 className="text-2xl font-semibold mb-4">🌍 Live Time Zone Converter</h2>
+
+      <div className="flex flex-col gap-3 bg-white shadow p-4 rounded-lg w-80">
+        <label>From Timezone:</label>
+        <input
+          type="text"
+          value={fromZone}
+          onChange={(e) => setFromZone(e.target.value)}
+          className="border p-2 rounded"
+          placeholder="Asia/Kolkata"
+        />
+
+        <label>To Timezone:</label>
+        <input
+          type="text"
+          value={toZone}
+          onChange={(e) => setToZone(e.target.value)}
+          className="border p-2 rounded"
+          placeholder="Europe/Berlin"
+        />
+
+        <label>Time in Source:</label>
+        <input
+          type="time"
+          value={inputTime}
+          onChange={(e) => setInputTime(e.target.value)}
+          className="border p-2 rounded"
+        />
+
+        <button
+          onClick={convertTime}
+          className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mt-2"
+        >
+          Convert
+        </button>
+      </div>
+
+      {convertedTime && (
+        <div className="mt-4 text-lg font-medium">
+          Converted Time in {toZone}: <span className="font-bold">{convertedTime}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+.converter-container {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
+  max-width: 450px;
+  margin: 40px auto;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+label {
+  font-weight: bold;
+}
+
+select, input, button {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #357abd;
+}
+
+.output-section {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
